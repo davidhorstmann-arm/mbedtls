@@ -243,6 +243,17 @@ typedef mbedtls_asn1_named_data mbedtls_x509_name;
  */
 typedef mbedtls_asn1_sequence mbedtls_x509_sequence;
 
+/*
+ * Container for the fields of the Authority Key Identifier object
+ */
+typedef struct mbedtls_x509_authority {
+    mbedtls_x509_buf keyIdentifier;
+    mbedtls_x509_name authorityCertIssuer;
+    mbedtls_x509_buf authorityCertSerialNumber;
+    mbedtls_x509_buf raw;
+}
+mbedtls_x509_authority;
+
 /** Container for date and time (precision in seconds). */
 typedef struct mbedtls_x509_time {
     int year, mon, day;         /**< Date. */
@@ -373,11 +384,11 @@ int mbedtls_x509_write_sig(unsigned char **p, unsigned char *start,
 
 #define MBEDTLS_X509_SAFE_SNPRINTF                          \
     do {                                                    \
-        if (ret < 0 || (size_t)ret >= n)                  \
+        if (ret < 0 || (size_t) ret >= n)                  \
         return MBEDTLS_ERR_X509_BUFFER_TOO_SMALL;    \
                                                           \
-        n -= (size_t)ret;                                  \
-        p += (size_t)ret;                                  \
+        n -= (size_t) ret;                                  \
+        p += (size_t) ret;                                  \
     } while (0)
 
 #ifdef __cplusplus
