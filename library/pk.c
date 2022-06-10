@@ -178,7 +178,7 @@ int mbedtls_pk_setup_opaque(mbedtls_pk_context *ctx,
 
     ctx->pk_info = info;
 
-    pk_ctx = (mbedtls_svc_key_id_t *)ctx->pk_ctx;
+    pk_ctx = (mbedtls_svc_key_id_t *) ctx->pk_ctx;
     *pk_ctx = key;
 
     return 0;
@@ -207,7 +207,7 @@ int mbedtls_pk_setup_rsa_alt(mbedtls_pk_context *ctx, void *key,
 
     ctx->pk_info = info;
 
-    rsa_alt = (mbedtls_rsa_alt_context *)ctx->pk_ctx;
+    rsa_alt = (mbedtls_rsa_alt_context *) ctx->pk_ctx;
 
     rsa_alt->key = key;
     rsa_alt->decrypt_func = decrypt_func;
@@ -308,7 +308,7 @@ int mbedtls_pk_can_do_ext(const mbedtls_pk_context *ctx, psa_algorithm_t alg,
         return (key_usage & usage) == usage;
     }
 
-    const mbedtls_svc_key_id_t *key = (const mbedtls_svc_key_id_t *)ctx->pk_ctx;
+    const mbedtls_svc_key_id_t *key = (const mbedtls_svc_key_id_t *) ctx->pk_ctx;
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
     psa_algorithm_t key_alg, key_alg2;
     psa_status_t status;
@@ -446,7 +446,7 @@ int mbedtls_pk_verify_restartable(mbedtls_pk_context *ctx,
         return ret;
     }
 #else /* MBEDTLS_ECDSA_C && MBEDTLS_ECP_RESTARTABLE */
-    (void)rs_ctx;
+    (void) rs_ctx;
 #endif /* MBEDTLS_ECDSA_C && MBEDTLS_ECP_RESTARTABLE */
 
     if (ctx->pk_info->verify_func == NULL) {
@@ -511,12 +511,10 @@ int mbedtls_pk_verify_ext(mbedtls_pk_type_t type, const void *options,
         return MBEDTLS_ERR_PK_BAD_INPUT_DATA;
     }
 
-    pss_opts = (const mbedtls_pk_rsassa_pss_options *)options;
+    pss_opts = (const mbedtls_pk_rsassa_pss_options *) options;
 
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
-    if (pss_opts->mgf1_hash_id == md_alg &&
-        ((size_t)pss_opts->expected_salt_len == hash_len ||
-         pss_opts->expected_salt_len  == MBEDTLS_RSA_SALT_LEN_ANY)) {
+    if (pss_opts->mgf1_hash_id == md_alg) {
         /* see RSA_PUB_DER_MAX_BYTES in pkwrite.c */
         unsigned char buf[38 + 2 * MBEDTLS_MPI_MAX_SIZE];
         unsigned char *p;
@@ -528,10 +526,7 @@ int mbedtls_pk_verify_ext(mbedtls_pk_type_t type, const void *options,
         psa_algorithm_t psa_md_alg = mbedtls_hash_info_psa_from_md(md_alg);
         mbedtls_svc_key_id_t key_id = MBEDTLS_SVC_KEY_ID_INIT;
         psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
-        psa_algorithm_t psa_sig_alg =
-            (pss_opts->expected_salt_len == MBEDTLS_RSA_SALT_LEN_ANY ?
-             PSA_ALG_RSA_PSS_ANY_SALT(psa_md_alg) :
-             PSA_ALG_RSA_PSS(psa_md_alg));
+        psa_algorithm_t psa_sig_alg = PSA_ALG_RSA_PSS_ANY_SALT(psa_md_alg);
         p = buf + sizeof(buf);
         key_len = mbedtls_pk_write_pubkey(&p, buf, ctx);
 
@@ -579,7 +574,7 @@ int mbedtls_pk_verify_ext(mbedtls_pk_type_t type, const void *options,
         }
 
         ret = mbedtls_rsa_rsassa_pss_verify_ext(mbedtls_pk_rsa(*ctx),
-                                                md_alg, (unsigned int)hash_len, hash,
+                                                md_alg, (unsigned int) hash_len, hash,
                                                 pss_opts->mgf1_hash_id,
                                                 pss_opts->expected_salt_len,
                                                 sig);
@@ -639,7 +634,7 @@ int mbedtls_pk_sign_restartable(mbedtls_pk_context *ctx,
         return ret;
     }
 #else /* MBEDTLS_ECDSA_C && MBEDTLS_ECP_RESTARTABLE */
-    (void)rs_ctx;
+    (void) rs_ctx;
 #endif /* MBEDTLS_ECDSA_C && MBEDTLS_ECP_RESTARTABLE */
 
     if (ctx->pk_info->sign_func == NULL) {
@@ -702,7 +697,7 @@ int mbedtls_pk_sign_ext(mbedtls_pk_type_t pk_type,
     }
 
     if (mbedtls_pk_get_type(ctx) == MBEDTLS_PK_OPAQUE) {
-        const mbedtls_svc_key_id_t *key = (const mbedtls_svc_key_id_t *)ctx->pk_ctx;
+        const mbedtls_svc_key_id_t *key = (const mbedtls_svc_key_id_t *) ctx->pk_ctx;
         psa_status_t status;
 
         status = psa_sign_hash(*key, PSA_ALG_RSA_PSS(psa_md_alg),
@@ -864,11 +859,11 @@ int mbedtls_pk_wrap_as_opaque(mbedtls_pk_context *pk,
                               psa_algorithm_t alg2)
 {
 #if !defined(MBEDTLS_ECP_C) && !defined(MBEDTLS_RSA_C)
-    ((void)pk);
-    ((void)key);
-    ((void)alg);
-    ((void)usage);
-    ((void)alg2);
+    ((void) pk);
+    ((void) key);
+    ((void) alg);
+    ((void) usage);
+    ((void) alg2);
 #else
 #if defined(MBEDTLS_ECP_C)
     if (mbedtls_pk_get_type(pk) == MBEDTLS_PK_ECKEY) {
