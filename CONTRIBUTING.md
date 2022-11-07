@@ -34,9 +34,19 @@ The project aims to minimise the impact on users upgrading to newer versions of 
 
 To minimise such disruption to users, where a change to the interface is required, all changes to the ABI or API, even on the main development branch where new features are added, need to be justifiable by either being a significant enhancement, new feature or bug fix which is best resolved by an interface change. If there is an API change, the contribution, if accepted, will be merged only when there will be a major release.
 
-Where changes to an existing interface are necessary, functions in the public interface which need to be changed, are marked as 'deprecated'. This is done with the preprocessor symbols `MBEDTLS_DEPRECATED_WARNING` and `MBEDTLS_DEPRECATED_REMOVED`. Then, a new function with a new name but similar if not identical behaviour to the original function containing the necessary changes should be created alongside the existing deprecated function.
+Where changes to an existing interface are necessary, functions in the public interface which need to be changed are marked as 'deprecated'. Then, a new function with a new name but similar if not identical behaviour to the original function containing the necessary changes should be created alongside the existing deprecated function.
 
-When a build is made with the deprecation preprocessor symbols defined, a compiler warning will be generated to warn a user that the function will be removed at some point in the future, notifying users that they should change from the older deprecated function to the newer function at their own convenience.
+To deprecate a function, the following actions must be taken:
+* In the header file (e.g. `include/mbedtls/xyz.h`):
+    * Surround the function declaration with `#if !defined(MBEDTLS_DEPRECATED_REMOVED)`.
+    * Add a line to the docstring of the form `\deprecated Reason for deprecation`.
+    * Add the `MBEDTLS_DEPRECATED` annotation to the function prototype (so `int foo();` becomes `int MBEDTLS_DEPRECATED foo();`).
+* In the source file (e.g. `library/xyz.c`):
+    * Surround the function definition with `#if !defined(MBEDTLS_DEPRECATED_REMOVED)`.
+* In a new file in ChangeLog.d (e.g. `ChangeLog.d/change-xyz-api.txt`)
+    * Add an entry under the heading `New deprecations` that describes the deprecation. See [the ChangeLog readme](ChangeLog.d/00README.md) for more information on the format of ChangeLog entries.
+
+When a build is made with `MBEDTLS_DEPRECATED_WARNING` defined, a compiler warning will be generated to warn a user that the function will be removed at some point in the future, notifying users that they should change from the older deprecated function to the newer function at their own convenience.
 
 Therefore, no changes are permitted to the definition of functions in the public interface which will change the API. Instead the interface can only be changed by its extension. As described above, if a function needs to be changed, a new function needs to be created alongside it, with a new name, and whatever change is necessary, such as a new parameter or the addition of a return value.
 
