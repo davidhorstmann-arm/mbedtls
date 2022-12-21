@@ -492,7 +492,9 @@ int mbedtls_pk_verify_restartable(mbedtls_pk_context *ctx,
  *
  * \note            If type is MBEDTLS_PK_RSASSA_PSS, then options must point
  *                  to a mbedtls_pk_rsassa_pss_options structure,
- *                  otherwise it must be NULL.
+ *                  otherwise it must be NULL. Note that if
+ *                  #MBEDTLS_USE_PSA_CRYPTO is defined, the salt length is not
+ *                  verified as PSA_ALG_RSA_PSS_ANY_SALT is used.
  */
 int mbedtls_pk_verify_ext(mbedtls_pk_type_t type, const void *options,
                           mbedtls_pk_context *ctx, mbedtls_md_type_t md_alg,
@@ -715,7 +717,7 @@ static inline mbedtls_rsa_context *mbedtls_pk_rsa(const mbedtls_pk_context pk)
 {
     switch (mbedtls_pk_get_type(&pk)) {
         case MBEDTLS_PK_RSA:
-            return (mbedtls_rsa_context *)(pk).MBEDTLS_PRIVATE(pk_ctx);
+            return (mbedtls_rsa_context *) (pk).MBEDTLS_PRIVATE(pk_ctx);
         default:
             return NULL;
     }
@@ -740,7 +742,7 @@ static inline mbedtls_ecp_keypair *mbedtls_pk_ec(const mbedtls_pk_context pk)
         case MBEDTLS_PK_ECKEY:
         case MBEDTLS_PK_ECKEY_DH:
         case MBEDTLS_PK_ECDSA:
-            return (mbedtls_ecp_keypair *)(pk).MBEDTLS_PRIVATE(pk_ctx);
+            return (mbedtls_ecp_keypair *) (pk).MBEDTLS_PRIVATE(pk_ctx);
         default:
             return NULL;
     }
