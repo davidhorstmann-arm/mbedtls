@@ -3552,75 +3552,81 @@ exit:
     {
         mbedtls_x509_crt *cert_cur = crt;
         mbedtls_x509_crt *cert_prv;
+        mbedtls_x509_sequence *seq_cur;
+        mbedtls_x509_sequence *seq_prv;
 
         while (cert_cur != NULL) {
-            mbedtls_pk_free(&cert_cur->pk);
+            mbedtls_x509_crt *cert_cur = crt;
+            mbedtls_x509_crt *cert_prv;
+
+            while (cert_cur != NULL) {
+                mbedtls_pk_free(&cert_cur->pk);
 
 #if defined(MBEDTLS_X509_RSASSA_PSS_SUPPORT)
-            mbedtls_free(cert_cur->sig_opts);
+                mbedtls_free(cert_cur->sig_opts);
 #endif
 
-            mbedtls_asn1_free_named_data_list_shallow(cert_cur->issuer.next);
-            mbedtls_asn1_free_named_data_list_shallow(cert_cur->subject.next);
-            mbedtls_asn1_sequence_free(cert_cur->ext_key_usage.next);
-            mbedtls_asn1_sequence_free(cert_cur->subject_alt_names.next);
-            mbedtls_asn1_sequence_free(cert_cur->certificate_policies.next);
+                mbedtls_asn1_free_named_data_list_shallow(cert_cur->issuer.next);
+                mbedtls_asn1_free_named_data_list_shallow(cert_cur->subject.next);
+                mbedtls_asn1_sequence_free(cert_cur->ext_key_usage.next);
+                mbedtls_asn1_sequence_free(cert_cur->subject_alt_names.next);
+                mbedtls_asn1_sequence_free(cert_cur->certificate_policies.next);
 
-            seq_cur = cert_cur->authority_key_id.authorityCertIssuer.next;
-            while (seq_cur != NULL) {
-                seq_prv = seq_cur;
-                seq_cur = seq_cur->next;
-                mbedtls_platform_zeroize(seq_prv,
-                                         sizeof(mbedtls_x509_sequence));
-                mbedtls_free(seq_prv);
-            }
+                seq_cur = cert_cur->authority_key_id.authorityCertIssuer.next;
+                while (seq_cur != NULL) {
+                    seq_prv = seq_cur;
+                    seq_cur = seq_cur->next;
+                    mbedtls_platform_zeroize(seq_prv,
+                                             sizeof(mbedtls_x509_sequence));
+                    mbedtls_free(seq_prv);
+                }
 
-            if (cert_cur->raw.p != NULL && cert_cur->own_buffer) {
-                mbedtls_platform_zeroize(cert_cur->raw.p, cert_cur->raw.len);
-                mbedtls_free(cert_cur->raw.p);
-            }
+                if (cert_cur->raw.p != NULL && cert_cur->own_buffer) {
+                    mbedtls_platform_zeroize(cert_cur->raw.p, cert_cur->raw.len);
+                    mbedtls_free(cert_cur->raw.p);
+                }
 
-            cert_prv = cert_cur;
-            cert_cur = cert_cur->next;
+                cert_prv = cert_cur;
+                cert_cur = cert_cur->next;
 
-            mbedtls_platform_zeroize(cert_prv, sizeof(mbedtls_x509_crt));
-            if (cert_prv != crt) {
-                mbedtls_free(cert_prv);
+                mbedtls_platform_zeroize(cert_prv, sizeof(mbedtls_x509_crt));
+                if (cert_prv != crt) {
+                    mbedtls_free(cert_prv);
+                }
             }
         }
-    }
 
 #if defined(MBEDTLS_ECDSA_C) && defined(MBEDTLS_ECP_RESTARTABLE)
 /*
  * Initialize a restart context
  */
-    void mbedtls_x509_crt_restart_init(mbedtls_x509_crt_restart_ctx *ctx)
-    {
-        mbedtls_pk_restart_init(&ctx->pk);
+        void mbedtls_x509_crt_restart_init(mbedtls_x509_crt_restart_ctx *ctx)
+        {
+            mbedtls_pk_restart_init(&ctx->pk);
 
-        ctx->parent = NULL;
-        ctx->fallback_parent = NULL;
-        ctx->fallback_signature_is_good = 0;
+            ctx->parent = NULL;
+            ctx->fallback_parent = NULL;
+            ctx->fallback_signature_is_good = 0;
 
-        ctx->parent_is_trusted = -1;
+            ctx->parent_is_trusted = -1;
 
-        ctx->in_progress = x509_crt_rs_none;
-        ctx->self_cnt = 0;
-        x509_crt_verify_chain_reset(&ctx->ver_chain);
-    }
+            ctx->in_progress = x509_crt_rs_none;
+            ctx->self_cnt = 0;
+            x509_crt_verify_chain_reset(&ctx->ver_chain);
+        }
 
 /*
  * Free the components of a restart context
  */
-    void mbedtls_x509_crt_restart_free(mbedtls_x509_crt_restart_ctx *ctx)
-    {
-        if (ctx == NULL) {
-            return;
-        }
+        void mbedtls_x509_crt_restart_free(mbedtls_x509_crt_restart_ctx *ctx)
+        {
+            if (ctx == NULL) {
+                return;
+            }
 
-        mbedtls_pk_restart_free(&ctx->pk);
-        mbedtls_x509_crt_restart_init(ctx);
-    }
+            mbedtls_pk_restart_free(&ctx->pk);
+            mbedtls_x509_crt_restart_init(ctx);
+        }
 #endif /* MBEDTLS_ECDSA_C && MBEDTLS_ECP_RESTARTABLE */
 
 #endif /* MBEDTLS_X509_CRT_PARSE_C */
