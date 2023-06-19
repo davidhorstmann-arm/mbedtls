@@ -118,16 +118,16 @@ static psa_status_t psa_aead_setup(
 #endif /* MBEDTLS_PSA_BUILTIN_ALG_CHACHA20_POLY1305 */
 
         default:
-            (void) status;
             (void) key_buffer;
-            return PSA_ERROR_NOT_SUPPORTED;
+            status = PSA_ERROR_NOT_SUPPORTED;
     }
 
-    operation->key_type = psa_get_key_type(attributes);
+    if (status == PSA_SUCCESS) {
+        operation->key_type = psa_get_key_type(attributes);
+        operation->tag_length = PSA_ALG_AEAD_GET_TAG_LENGTH(alg);
+    }
 
-    operation->tag_length = PSA_ALG_AEAD_GET_TAG_LENGTH(alg);
-
-    return PSA_SUCCESS;
+    return status;
 }
 
 psa_status_t mbedtls_psa_aead_encrypt(
