@@ -149,14 +149,19 @@ const mbedtls_cipher_info_t *mbedtls_cipher_info_from_psa(
             break;
 #endif
         default:
-            return NULL;
+            cipher_id_tmp = MBEDTLS_CIPHER_ID_NONE;
+            cipher_id = NULL;
     }
     if (cipher_id != NULL) {
         *cipher_id = cipher_id_tmp;
     }
 
-    return mbedtls_cipher_info_from_values(cipher_id_tmp,
-                                           (int) key_bits, mode);
+    if (cipher_id_tmp == MBEDTLS_CIPHER_ID_NONE) {
+        return NULL;
+    } else {
+        return mbedtls_cipher_info_from_values(cipher_id_tmp,
+                                               (int) key_bits, mode);
+    }
 }
 
 #if defined(MBEDTLS_PSA_BUILTIN_CIPHER)
